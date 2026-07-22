@@ -1,4 +1,3 @@
-import { prisma } from '@/lib/prisma'
 import 'dotenv/config'
 import { execSync } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
@@ -26,15 +25,19 @@ export default <Environment>{
 
     process.env.DATABASE_URL = databaseUrl
 
+    const { prisma } = await import('@/lib/prisma')
+
     execSync('npx prisma migrate deploy')
 
     return {
       async teardown() {
-        await prisma.$executeRawUnsafe(
-          `DROP SCHEMA IF EXISTS "${schema}" CASCADE`,
-        )
-
-        await prisma.$disconnect()
+        try {
+          await prisma.$executeRawUnsafe(
+            `DROP SCHEMA IF EXISTS "${schema}" CASCADE`,
+          )
+        } finally {
+          await prisma.$disconnect()
+        }
       },
     }
   },
