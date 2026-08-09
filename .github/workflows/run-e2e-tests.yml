@@ -4,12 +4,12 @@ on: [pull_request]
 
 jobs:
   run-e2e-tests:
-    name: run E2E Tests
+    name: Run E2E Tests
     runs-on: ubuntu-latest
 
     services:
       postgres:
-        image: bitnamilegacy/postgresql
+        image: bitnami/postgresql
         ports:
           - 5432:5432
         env:
@@ -19,12 +19,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: 'npm'
+
       - run: npm ci
+
       - run: npm run test:e2e
-        env: 
+        env:
           JWT_SECRET: testing
-          DATABASE-URL: "postgresql://docker:docker@localhost:5432/apigym?schema=public"
+          DATABASE_URL: "postgresql://docker:docker@localhost:5432/apigym?schema=public"
